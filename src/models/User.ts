@@ -14,6 +14,8 @@ export interface IUser extends SoftDeleteDocument {
 
 interface IUserModel extends SoftDeleteModel<IUser> {}
 
+const rolesEnum = ['user', 'admin', 'superAdmin'];
+
 const userSchema: Schema = new Schema({
   _id: { 
     type: String,
@@ -59,7 +61,17 @@ const userSchema: Schema = new Schema({
   },
   roles: {
     type: [String],
+    required: true,
     default: ['user'],
+    validate: {
+      validator: function(roles: string[]) {
+        return roles.every(role => rolesEnum.includes(role));
+      },
+      message: (props: { value: string[] }) => {
+        const invalidRoles = props.value.filter(role => !rolesEnum.includes(role));
+        return `${invalidRoles.join(', ')}`;
+      }
+    }
   },
 }, { timestamps: true });
 
