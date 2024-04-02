@@ -5,6 +5,7 @@ import { validateAllowedFields } from '../utils/validateFields';
 
 import User from '../models/User';
 import formatResponse from '../helpers/responseHelper';
+import { authMiddleware } from '../middlewares/authMiddleware';
 
 const router = Router();
 
@@ -25,7 +26,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.get('/', async (req, res) => {
+router.get('/', authMiddleware, async (req, res) => {
   try {
     const page = parseInt(req.headers.page as string) || 1;
     const limit = parseInt(req.headers.limit as string) || 10;
@@ -41,8 +42,7 @@ router.get('/', async (req, res) => {
 
     const allowedFields = ['username', 'email'];
     allowedFields.forEach(field => {
-      if (filter[field]) 
-        filter[field] = new RegExp(filter[field], 'i');
+      if (filter[field]) filter[field] = new RegExp(filter[field], 'i');
     });
 
     const skip = (page - 1) * limit;
@@ -55,7 +55,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', authMiddleware, async (req, res) => {
   const allowedFields = ['username'];
   const errors = validateAllowedFields(Object.keys(req.body), allowedFields);
   
@@ -75,7 +75,7 @@ router.patch('/:id', async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(req.params.id, { 
       deleted: true, deletedAt: new Date() 
@@ -89,7 +89,7 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-router.post('/restore/:id', async (req, res) => {
+router.post('/restore/:id', authMiddleware, async (req, res) => {
   try {
     const userId = req.params.id;
     const user = await User.restore({ _id: userId });
