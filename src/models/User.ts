@@ -9,6 +9,7 @@ export interface IUser extends SoftDeleteDocument {
   username: string;
   email: string;
   password: string;
+  roles: string[];
 }
 
 interface IUserModel extends SoftDeleteModel<IUser> {}
@@ -55,6 +56,10 @@ const userSchema: Schema = new Schema({
         return true;
       },
     }
+  },
+  roles: {
+    type: [String],
+    default: ['user'],
   },
 }, { timestamps: true });
 
