@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import mongooseDelete, { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
 
+import bcrypt from 'bcrypt';
 import validator from 'validator';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -59,6 +60,18 @@ const userSchema: Schema = new Schema({
 
 userSchema.set('autoIndex', true);
 userSchema.plugin(mongooseDelete, { indexFields: 'all', overrideMethods: 'all' });
+
+userSchema.pre<IUser>('save', async function (next) {
+  if (!this.isModified('password')) return next();
+
+  try {
+    const salt = await bcrypt.genSalt(12);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error) {
+    next(error as Error);
+  }
+});
 
 const User: IUserModel = mongoose.model<IUser, IUserModel>('User', userSchema);
 export default User;
