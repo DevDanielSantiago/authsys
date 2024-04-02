@@ -92,7 +92,6 @@ router.delete('/:id', async (req, res) => {
 router.post('/restore/:id', async (req, res) => {
   try {
     const userId = req.params.id;
-    // const user = await User.findByIdAndUpdate(userId, { deleted: false, deletedAt: null }, { new: true });
     const user = await User.restore({ _id: userId });
     
     if (!user)
@@ -100,7 +99,7 @@ router.post('/restore/:id', async (req, res) => {
 
     res.status(200).send(user);
   } catch (error) {
-    res.status(500).send(error);
+    handleError(error as Error, res);
   }
 });
 
