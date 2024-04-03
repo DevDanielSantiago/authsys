@@ -18,8 +18,9 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
     return res.status(401).json({ status: 401, errors: { token: 'malFormatted' } });
 
   try {
-    const publicKeyPath = process.env.PUBLIC_KEY_PATH;
-    const publicKey = require('fs').readFileSync(publicKeyPath, 'utf8');
+    const publicKey = process.env.PUBLIC_KEY;
+    if (!publicKey)
+      return res.status(500).json({ status: 500, errors: { server: 'internalServerError' }});
     
     jwt.verify(token, publicKey, { algorithms: ['RS256'] });
     next();

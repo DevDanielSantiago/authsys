@@ -11,8 +11,9 @@ export const roleMiddleware = (requiredRoles: string[]) => {
       return res.status(401).json({ status: 401, errors: { token: 'notProvided' } });
 
     const token = authHeader.split(' ')[1];
-    const publicKeyPath = process.env.PUBLIC_KEY_PATH;
-    const publicKey = require('fs').readFileSync(publicKeyPath, 'utf8');
+    const publicKey = process.env.PUBLIC_KEY;
+    if (!publicKey)
+      return res.status(500).json({ status: 500, errors: { server: 'internalServerError' }});
 
     try {
       const decoded: any = jwt.verify(token, publicKey, { algorithms: ['RS256'] });
