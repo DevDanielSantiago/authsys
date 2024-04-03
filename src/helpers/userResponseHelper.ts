@@ -7,12 +7,13 @@ type ResponseData = (Document<unknown, {}, IUser> & IUser & {
     _id: Types.ObjectId;
 })[] 
 
-const formatResponse = (data: ResponseData) => {
+const formatUserResponse = (data: ResponseData) => {
   if (Array.isArray(data)) {
     return data.map((item) => ({
       _id: item._id,
       username: item.username,
       email: item.email,
+      roles: item.roles,
     }));
   }
 
@@ -23,4 +24,4 @@ const formatResponse = (data: ResponseData) => {
   };
 };
 
-export default formatResponse
+export default formatUserResponse

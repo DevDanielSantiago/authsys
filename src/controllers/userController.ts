@@ -5,7 +5,7 @@ import { validateAllowedFields } from '../utils/validateFields';
 
 import User from '../models/User';
 
-import formatResponse from '../helpers/responseHelper';
+import formatUserResponse from '../helpers/userResponseHelper';
 
 export const createUser = async (req: Request, res: Response) => {
   const allowedFields = ['username', 'email', 'password'];
@@ -18,7 +18,7 @@ export const createUser = async (req: Request, res: Response) => {
     const user = new User(req.body);
     await user.save();
 
-    res.status(201).send(formatResponse(user));
+    res.status(201).send(formatUserResponse(user));
   } catch (error) {
     handleError(error as Error, res);
   }
@@ -47,7 +47,7 @@ export const listUsers = async (req: Request, res: Response) => {
     const list = await User.find(filter, '-password -__v').skip(skip).limit(limit);
     const total = await User.countDocuments(filter);
 
-    res.json({ total, list: formatResponse(list) });
+    res.json({ total, list: formatUserResponse(list) });
   } catch (error) {
     handleError(error as Error, res);
   }
@@ -67,7 +67,7 @@ export const updateUser = async (req: Request, res: Response) => {
     });
     if (!user) return res.status(404).send({ status: 400, errors: { user: 'notFound'} });   
 
-    res.status(200).send(formatResponse(user));
+    res.status(200).send(formatUserResponse(user));
   } catch (error) {
     handleError(error as Error, res);
   }
@@ -81,7 +81,7 @@ export const deleteUser = async (req: Request, res: Response) => {
 
     if (!user) return res.status(404).send({ status: 400, errors: { user: 'notFound'} })
 
-    res.status(200).send(formatResponse(user));
+    res.status(200).send(formatUserResponse(user));
   } catch (error) {
     handleError(error as Error, res);
   }

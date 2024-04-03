@@ -12,7 +12,7 @@ import { validateAllowedFields } from '../utils/validateFields';
 
 import User from '../models/User';
 
-import formatResponse from '../helpers/responseHelper';
+import formatUserResponse from '../helpers/userResponseHelper';
 
 dotenv.config();
 
@@ -82,7 +82,7 @@ export const updateRole = async (req: Request, res: Response) => {
     });
     
     if (!user) return res.status(404).send({ status: 400, errors: { user: 'notFound'} });   
-    res.status(200).send(formatResponse(user));
+    res.status(200).send(formatUserResponse(user));
   } catch (error) {
     handleError(error as Error, res);
   }
