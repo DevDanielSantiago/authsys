@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "start:dev": "nodemon",
-    "start": "node dist/app.js"
+    "start": "node dist/server.js"
   },
   "resolutions": {
     "@types/mime": "3.0.4"
