@@ -1,20 +1,20 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import mongooseDelete, { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
 
 import bcrypt from 'bcrypt';
 import validator from 'validator';
 import { v4 as uuidv4 } from 'uuid';
 
+import Role, { IRole } from './Role';
+
 export interface IUser extends SoftDeleteDocument {
   username: string;
   email: string;
   password: string;
-  roles: string[];
+  role: IRole;
 }
 
 interface IUserModel extends SoftDeleteModel<IUser> {}
-
-const rolesEnum = ['user', 'admin', 'superAdmin'];
 
 const userSchema: Schema = new Schema({
   _id: { 
@@ -59,19 +59,10 @@ const userSchema: Schema = new Schema({
       },
     }
   },
-  roles: {
-    type: [String],
+  role: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Role',
     required: true,
-    default: ['user'],
-    validate: {
-      validator: function(roles: string[]) {
-        return roles.every(role => rolesEnum.includes(role));
-      },
-      message: (props: { value: string[] }) => {
-        const invalidRoles = props.value.filter(role => !rolesEnum.includes(role));
-        return `${invalidRoles.join(', ')}`;
-      }
-    }
   },
 }, { timestamps: true });
 
@@ -84,6 +75,13 @@ userSchema.pre<IUser>('save', async function (next) {
   try {
     const salt = await bcrypt.genSalt(12);
     this.password = await bcrypt.hash(this.password, salt);
+
+    const roleId = this.role;
+    const roleExists = await Role.findById(roleId);
+
+    if (!roleExists)
+      return next(new Error('Uma ou mais roles são inválidas.'));
+
     next();
   } catch (error) {
     next(error as Error);
