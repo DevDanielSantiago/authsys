@@ -13,7 +13,7 @@ const formatUserResponse = (data: ResponseData) => {
       _id: item._id,
       username: item.username,
       email: item.email,
-      roles: item.roles,
+      role: item.role,
     }));
   }
 
