@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 
 import User from '../models/User';
 
-export const roleMiddleware = (requiredRoles: string[]) => {
+export const roleMiddleware = (permissionRequired: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
 
@@ -18,13 +18,15 @@ export const roleMiddleware = (requiredRoles: string[]) => {
     try {
       const decoded: any = jwt.verify(token, publicKey, { algorithms: ['RS256'] });
 
-      const user = await User.findById(decoded.userId);
+      const user = await User.findById(decoded.userId).populate({
+        path: 'roles',
+        populate: { path: 'permissions' }
+      });
       if (!user) return res.status(404).json({ status: 404, erros: { user: 'notFound' } });
 
-      const userRoles = user.roles;
-      const hasRequiredRole = requiredRoles.some(role => userRoles.includes(role));
+      const hasPermission = user.role.permissions.map((permission) => permission.name === permissionRequired);
 
-      if (!hasRequiredRole)
+      if (!hasPermission)
         return res.status(403).json({ status: 403, errors: { roles: 'forbidden' } });
 
       next();
