@@ -8,9 +8,9 @@ import { createUser, listUsers, updateUser, deleteUser, restoreUser } from '../c
 const router = Router();
 
 router.post('/', createUser);
-router.get('/', authMiddleware, roleMiddleware(['admin', 'superAdmin']), listUsers);
-router.patch('/:id', authMiddleware, roleMiddleware(['user', 'admin', 'superAdmin']), updateUser);
-router.delete('/:id', authMiddleware, roleMiddleware(['user', 'admin', 'superAdmin']), deleteUser);
-router.post('/restore/:id', authMiddleware, roleMiddleware(['user', 'admin', 'superAdmin']), restoreUser);
+router.get('/', authMiddleware, roleMiddleware('list_users'), listUsers);
+router.patch('/:id', authMiddleware, roleMiddleware('update_user'), updateUser);
+router.delete('/:id', authMiddleware, roleMiddleware('delete_user'), deleteUser);
+router.post('/restore/:id', authMiddleware, roleMiddleware('restore_user'), restoreUser);
 
 export default router;
