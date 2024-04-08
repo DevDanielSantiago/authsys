@@ -10,7 +10,7 @@ export interface IRole extends SoftDeleteDocument {
   permissions: IPermission[];
 }
 
-interface IRoleModel extends SoftDeleteModel<IPermission> {}
+interface IRoleModel extends SoftDeleteModel<IRole> {}
 
 const roleSchema: Schema = new Schema({
   _id: { 
@@ -26,7 +26,7 @@ const roleSchema: Schema = new Schema({
     maxLength: [20, 'maxLength'],
   },
   permissions: [{
-    type: mongoose.Schema.Types.ObjectId, 
+    type: String, 
     ref: 'Permission'
   }]
 });
