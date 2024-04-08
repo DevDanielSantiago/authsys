@@ -11,6 +11,6 @@ app.use(express.json());
 app.use(errorHandler);
 
 // routes
-app.use(userRoutes)
+app.use(userRoutes);
 
 export default app;

@@ -1,5 +1,8 @@
 import mongoose, { Schema } from 'mongoose';
-import mongooseDelete, { SoftDeleteDocument, SoftDeleteModel } from 'mongoose-delete';
+import mongooseDelete, {
+  SoftDeleteDocument,
+  SoftDeleteModel,
+} from 'mongoose-delete';
 
 import { IPermission } from './Permission';
 
@@ -13,9 +16,9 @@ export interface IRole extends SoftDeleteDocument {
 interface IRoleModel extends SoftDeleteModel<IRole> {}
 
 const roleSchema: Schema = new Schema({
-  _id: { 
+  _id: {
     type: String,
-    default: uuidv4 
+    default: uuidv4,
   },
   name: {
     type: String,
@@ -25,14 +28,19 @@ const roleSchema: Schema = new Schema({
     minlength: [3, 'minlength'],
     maxLength: [20, 'maxLength'],
   },
-  permissions: [{
-    type: String, 
-    ref: 'Permission'
-  }]
+  permissions: [
+    {
+      type: String,
+      ref: 'Permission',
+    },
+  ],
 });
 
 roleSchema.set('autoIndex', true);
-roleSchema.plugin(mongooseDelete, { indexFields: 'all', overrideMethods: 'all' });
+roleSchema.plugin(mongooseDelete, {
+  indexFields: 'all',
+  overrideMethods: 'all',
+});
 
 const Role: IRoleModel = mongoose.model<IRole, IRoleModel>('Role', roleSchema);
 

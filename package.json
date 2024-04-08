@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc",
     "start:dev": "nodemon",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "format": "prettier --write ."
   },
   "resolutions": {
     "@types/mime": "3.0.4"
@@ -20,7 +21,9 @@
     "@types/mongoose-delete": "^1.0.4",
     "@types/uuid": "^9.0.8",
     "@types/validator": "^13.11.9",
+    "eslint-config-prettier": "^9.1.0",
     "nodemon": "^3.1.0",
+    "prettier": "^3.2.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.3"
   },

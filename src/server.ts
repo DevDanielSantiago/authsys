@@ -5,7 +5,7 @@ import connectToMongo from './database';
 
 dotenv.config();
 
-const PORT = process.env.PORT
+const PORT = process.env.PORT;
 
 const startServer = async () => {
   try {
@@ -18,5 +18,5 @@ const startServer = async () => {
     process.exit(1);
   }
 };
-  
+
 startServer();

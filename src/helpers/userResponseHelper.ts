@@ -1,15 +1,19 @@
-import { Document, Types } from "mongoose";
-import { IUser } from "../models/User";
+import { Document, Types } from 'mongoose';
+import { IUser } from '../models/User';
 
-type ResponseData = (Document<unknown, {}, IUser> & IUser & {
-    _id: Types.ObjectId;
-}) | (Document<unknown, {}, IUser> & IUser & {
-    _id: Types.ObjectId;
-})[] 
+type ResponseData =
+  | (Document<unknown, {}, IUser> &
+      IUser & {
+        _id: Types.ObjectId;
+      })
+  | (Document<unknown, {}, IUser> &
+      IUser & {
+        _id: Types.ObjectId;
+      })[];
 
 const formatUserResponse = (data: ResponseData) => {
   if (Array.isArray(data)) {
-    return data.map((item) => ({
+    return data.map(item => ({
       _id: item._id,
       username: item.username,
       email: item.email,
@@ -25,4 +29,4 @@ const formatUserResponse = (data: ResponseData) => {
   };
 };
 
-export default formatUserResponse
+export default formatUserResponse;

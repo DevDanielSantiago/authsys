@@ -11,7 +11,7 @@ import Role from '../models/Role';
 export const createPermission = async (req: Request, res: Response) => {
   const allowedFields = ['name', 'description'];
   const errors = validateAllowedFields(Object.keys(req.body), allowedFields);
-  
+
   if (Object.keys(errors).length)
     return res.status(400).json({ status: 400, errors });
 
@@ -23,7 +23,7 @@ export const createPermission = async (req: Request, res: Response) => {
   } catch (error) {
     handleError(error as Error, res);
   }
-}
+};
 
 export const listPermissions = async (req: Request, res: Response) => {
   try {
@@ -36,7 +36,9 @@ export const listPermissions = async (req: Request, res: Response) => {
     try {
       if (filterString) filter = JSON.parse(filterString as string);
     } catch (parseError) {
-      return res.status(400).send({ status: 400, errors: { filter: 'malFormatted'} });
+      return res
+        .status(400)
+        .send({ status: 400, errors: { filter: 'malFormatted' } });
     }
 
     const allowedFields = ['name'];
@@ -52,57 +54,75 @@ export const listPermissions = async (req: Request, res: Response) => {
   } catch (error) {
     handleError(error as Error, res);
   }
-}
+};
 
 export const updatePermission = async (req: Request, res: Response) => {
   const allowedFields = ['name', 'description'];
   const errors = validateAllowedFields(Object.keys(req.body), allowedFields);
-  
-  if (Object.keys(errors).length)
-    return res.status(400).json({ errors });
-  
+
+  if (Object.keys(errors).length) return res.status(400).json({ errors });
+
   try {
-    const permission = await Permission.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
-    if (!permission) return res.status(404).send({ status: 400, errors: { user: 'notFound'} });   
+    const permission = await Permission.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+    if (!permission)
+      return res
+        .status(404)
+        .send({ status: 400, errors: { user: 'notFound' } });
 
     res.status(200).send(formatPermissionResponse(permission));
   } catch (error) {
     handleError(error as Error, res);
   }
-}
+};
 
 export const deletePermission = async (req: Request, res: Response) => {
   try {
     const isPermissionUsed = await Role.findOne({ permissions: req.params.id });
 
     if (isPermissionUsed)
-      return res.status(403).json({ errors: { permission: 'Permission is in use' } });
+      return res
+        .status(403)
+        .json({ errors: { permission: 'Permission is in use' } });
 
-    const permission = await Permission.findByIdAndUpdate(req.params.id, { 
-      deleted: true, deletedAt: new Date() 
-    }, { new: true });
+    const permission = await Permission.findByIdAndUpdate(
+      req.params.id,
+      {
+        deleted: true,
+        deletedAt: new Date(),
+      },
+      { new: true }
+    );
 
-    if (!permission) return res.status(404).send({ status: 400, errors: { user: 'notFound'} })
+    if (!permission)
+      return res
+        .status(404)
+        .send({ status: 400, errors: { user: 'notFound' } });
 
     res.status(200).send(formatPermissionResponse(permission));
   } catch (error) {
     handleError(error as Error, res);
   }
-}
+};
 
 export const restorePermission = async (req: Request, res: Response) => {
   try {
     const permissionId = req.params.id;
     const permission = await Permission.restore({ _id: permissionId });
-    
+
     if (!permission)
-      return res.status(404).send({ status: 400, errors: { user: 'notFound'} });
-    
+      return res
+        .status(404)
+        .send({ status: 400, errors: { user: 'notFound' } });
+
     res.status(200).send(permission);
   } catch (error) {
     handleError(error as Error, res);
   }
-}
+};

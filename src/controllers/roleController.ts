@@ -12,7 +12,7 @@ import User from '../models/User';
 export const createRole = async (req: Request, res: Response) => {
   const allowedFields = ['name', 'permissions'];
   const errors = validateAllowedFields(Object.keys(req.body), allowedFields);
-  
+
   if (Object.keys(errors).length)
     return res.status(400).json({ status: 400, errors });
 
@@ -22,7 +22,11 @@ export const createRole = async (req: Request, res: Response) => {
     for (let i = 0; i < permissions.length; i++) {
       const permissionExists = await Permission.findById(permissions[i]);
       if (!permissionExists) {
-        return res.status(404).json({ message: `Permissão com ID ${permissions[i]} não encontrada.` });
+        return res
+          .status(404)
+          .json({
+            message: `Permissão com ID ${permissions[i]} não encontrada.`,
+          });
       }
     }
 
@@ -33,7 +37,7 @@ export const createRole = async (req: Request, res: Response) => {
   } catch (error) {
     handleError(error as Error, res);
   }
-}
+};
 
 export const listRoles = async (req: Request, res: Response) => {
   try {
@@ -46,7 +50,9 @@ export const listRoles = async (req: Request, res: Response) => {
     try {
       if (filterString) filter = JSON.parse(filterString as string);
     } catch (parseError) {
-      return res.status(400).send({ status: 400, errors: { filter: 'malFormatted'} });
+      return res
+        .status(400)
+        .send({ status: 400, errors: { filter: 'malFormatted' } });
     }
 
     const allowedFields = ['name'];
@@ -55,36 +61,41 @@ export const listRoles = async (req: Request, res: Response) => {
     });
 
     const skip = (page - 1) * limit;
-    const list = await Role.find(filter, '-__v').populate({
-      path: 'permissions'
-    }).skip(skip).limit(limit);
+    const list = await Role.find(filter, '-__v')
+      .populate({
+        path: 'permissions',
+      })
+      .skip(skip)
+      .limit(limit);
     const total = await Role.countDocuments(filter);
 
     res.json({ total, list: formatRoleResponse(list) });
   } catch (error) {
     handleError(error as Error, res);
   }
-}
+};
 
 export const updateRole = async (req: Request, res: Response) => {
   const allowedFields = ['name', 'permissions'];
   const errors = validateAllowedFields(Object.keys(req.body), allowedFields);
-  
-  if (Object.keys(errors).length)
-    return res.status(400).json({ errors });
-  
+
+  if (Object.keys(errors).length) return res.status(400).json({ errors });
+
   try {
     const role = await Role.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
     });
-    if (!role) return res.status(404).send({ status: 400, errors: { user: 'notFound'} });   
+    if (!role)
+      return res
+        .status(404)
+        .send({ status: 400, errors: { user: 'notFound' } });
 
     res.status(200).send(formatRoleResponse(role));
   } catch (error) {
     handleError(error as Error, res);
   }
-}
+};
 
 export const deleteRole = async (req: Request, res: Response) => {
   try {
@@ -93,28 +104,38 @@ export const deleteRole = async (req: Request, res: Response) => {
     if (isRoleUsed)
       return res.status(403).json({ errors: { role: 'Role is in use' } });
 
-    const permission = await Role.findByIdAndUpdate(req.params.id, { 
-      deleted: true, deletedAt: new Date() 
-    }, { new: true });
+    const permission = await Role.findByIdAndUpdate(
+      req.params.id,
+      {
+        deleted: true,
+        deletedAt: new Date(),
+      },
+      { new: true }
+    );
 
-    if (!permission) return res.status(404).send({ status: 400, errors: { user: 'notFound'} })
+    if (!permission)
+      return res
+        .status(404)
+        .send({ status: 400, errors: { user: 'notFound' } });
 
     res.status(200).send(formatRoleResponse(permission));
   } catch (error) {
     handleError(error as Error, res);
   }
-}
+};
 
 export const restoreRole = async (req: Request, res: Response) => {
   try {
     const roleId = req.params.id;
     const role = await Role.restore({ _id: roleId });
-    
+
     if (!role)
-      return res.status(404).send({ status: 400, errors: { user: 'notFound'} });
-    
+      return res
+        .status(404)
+        .send({ status: 400, errors: { user: 'notFound' } });
+
     res.status(200).send(role);
   } catch (error) {
     handleError(error as Error, res);
   }
-}
+};
