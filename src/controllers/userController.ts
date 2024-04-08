@@ -15,7 +15,7 @@ export const createUser = async (req: Request, res: Response) => {
     return res.status(400).json({ status: 400, errors });
 
   try {
-    const user = new User(req.body);
+    const user = new User(req.body)
     await user.save();
 
     res.status(201).send(formatUserResponse(user));
@@ -44,7 +44,8 @@ export const listUsers = async (req: Request, res: Response) => {
     });
 
     const skip = (page - 1) * limit;
-    const list = await User.find(filter, '-password -__v').skip(skip).limit(limit);
+    const list = await User.find(filter, '-password -__v')
+      .populate({ path: 'role' }).skip(skip).limit(limit);
     const total = await User.countDocuments(filter);
 
     res.json({ total, list: formatUserResponse(list) });
