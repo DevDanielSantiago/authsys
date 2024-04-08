@@ -9,6 +9,7 @@ import { handleError } from '../utils/errorHandler';
 import { validateAllowedFields } from '../utils/validateFields';
 
 import User from '../models/User';
+import Role from '../models/Role';
 
 import formatUserResponse from '../helpers/userResponseHelper';
 
@@ -35,7 +36,7 @@ export const loginUser = async (req: Request, res: Response) => {
 
 export const updateRole = async (req: Request, res: Response) => {
   try {
-    const allowedFields = ['roles'];
+    const allowedFields = ['role'];
     const errors = validateAllowedFields(Object.keys(req.body), allowedFields);
     
     if (Object.keys(errors).length)
@@ -52,25 +53,30 @@ export const updateRole = async (req: Request, res: Response) => {
       return res.status(500).json({ status: 500, errors: { server: 'internalServerError' }});
     
     const decoded: any = jwt.verify(token, publicKey, { algorithms: ['RS256'] });
-    const userMakingRequest = await User.findById(decoded.userId);
+    const userMakingRequest = await User.findById(decoded.userId).populate({ path: 'role'});
     const userToUpdate = await User.findById(req.params.id);
-
+    
     if (!userMakingRequest || !userToUpdate)
       return res.status(404).json({ status: 404, erros: { user: 'notFound' } })
 
-    if (userMakingRequest.roles.includes('admin')) {
-      if (userMakingRequest.id === userToUpdate.id || req.body.roles.includes('superAdmin')) {
-        return res.status(403).json({ errors: { roles: 'operationNotAllowed' } });
+    const role = await Role.findById(req.body.role);
+    
+    if (!role)
+      return res.status(404).send({ status: 400, errors: { role: 'notFound'} });
+
+    if (userMakingRequest.role.name === 'admin') {
+      if (userMakingRequest.id === userToUpdate.id || role.name === 'superAdmin') {
+        return res.status(403).json({ errors: { role: 'operationNotAllowed' } });
       }
     }
   
-    if (userMakingRequest.roles.includes('superAdmin')) {
-      if (userMakingRequest.id === userToUpdate.id && !req.body.roles.includes('superAdmin')) {
-        return res.status(403).json({ errors: { roles: 'cannotRemoveSuperAdmin' } });
+    if (userMakingRequest.role.name === 'superAdmin') {
+      if (userMakingRequest.id === userToUpdate.id && role.name !== 'superAdmin') {
+        return res.status(403).json({ errors: { role: 'cannotRemoveSuperAdmin' } });
       }
     } else {
-      if (userToUpdate.roles.includes('superAdmin')) {
-        return res.status(403).json({ errors: { roles: 'cannotEditSuperAdmin' } });
+      if (userToUpdate.role.name === 'superAdmin') {
+        return res.status(403).json({ errors: { role: 'cannotEditSuperAdmin' } });
       }
     }
     
