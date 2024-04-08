@@ -60,7 +60,7 @@ const userSchema: Schema = new Schema({
     }
   },
   role: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
     ref: 'Role',
     required: true,
   },
