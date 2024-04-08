@@ -13,7 +13,7 @@ const formatUserResponse = (data: ResponseData) => {
       _id: item._id,
       username: item.username,
       email: item.email,
-      role: item.role,
+      role: item.role.name,
     }));
   }
 
@@ -21,6 +21,7 @@ const formatUserResponse = (data: ResponseData) => {
     _id: data._id,
     username: data.username,
     email: data.email,
+    role: data.role.name,
   };
 };
 
