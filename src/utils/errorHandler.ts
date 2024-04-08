@@ -21,7 +21,6 @@ export const handleError = (error: any, res: Response): void => {
   } else if (error.code === 11000) {
     handleDuplicateKeyError(error, res);
   } else {
-    console.log(error)
     res.status(500).send({ status: 500, errors: { server: 'internalServerError' }});
   }
 };
