@@ -19,13 +19,12 @@ export const roleMiddleware = (permissionRequired: string) => {
       const decoded: any = jwt.verify(token, publicKey, { algorithms: ['RS256'] });
 
       const user = await User.findById(decoded.userId).populate({
-        path: 'roles',
+        path: 'role',
         populate: { path: 'permissions' }
       });
       if (!user) return res.status(404).json({ status: 404, erros: { user: 'notFound' } });
 
-      const hasPermission = user.role.permissions.map((permission) => permission.name === permissionRequired);
-
+      const hasPermission = user.role.permissions.find((permission) => permission.name === permissionRequired);
       if (!hasPermission)
         return res.status(403).json({ status: 403, errors: { roles: 'forbidden' } });
 
