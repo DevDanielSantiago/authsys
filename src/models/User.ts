@@ -66,7 +66,7 @@ const userSchema: Schema = new Schema(
     role: {
       type: String,
       ref: 'Role',
-      required: true,
+      default: '32affff7-1929-49a5-8df2-5dffb87643ae',
     },
   },
   { timestamps: true }
@@ -88,7 +88,7 @@ userSchema.pre<IUser>('save', async function (next) {
     const roleId = this.role;
     const roleExists = await Role.findById(roleId);
 
-    if (!roleExists) return next(new Error('Uma ou mais roles são inválidas.'));
+    if (!roleExists) return next(new Error('Role são inválida'));
 
     next();
   } catch (error) {
