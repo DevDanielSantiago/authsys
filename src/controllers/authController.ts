@@ -99,7 +99,7 @@ export const updateRole = async (req: Request, res: Response) => {
 
     if (!role)
       return res.status(404).send({
-        status: 400,
+        status: 404,
         message: 'Role not found.',
         errors: { role: 'notFound' },
       });
@@ -147,7 +147,7 @@ export const updateRole = async (req: Request, res: Response) => {
 
     if (!user)
       return res.status(404).send({
-        status: 400,
+        status: 404,
         message: 'User not found.',
         errors: { user: 'notFound' },
       });

@@ -82,7 +82,7 @@ export const updatePermission = async (req: Request, res: Response) => {
 
     if (!permission)
       return res.status(404).send({
-        status: 400,
+        status: 404,
         message: 'Permission not found.',
         errors: { permission: 'notFound' },
       });
@@ -112,7 +112,7 @@ export const deletePermission = async (req: Request, res: Response) => {
 
     if (!permission)
       return res.status(404).send({
-        status: 400,
+        status: 404,
         message: 'Permission not found.',
         errors: { permission: 'notFound' },
       });
@@ -130,7 +130,7 @@ export const restorePermission = async (req: Request, res: Response) => {
 
     if (!permission)
       return res.status(404).send({
-        status: 400,
+        status: 404,
         message: 'Permission not found.',
         errors: { permission: 'notFound' },
       });

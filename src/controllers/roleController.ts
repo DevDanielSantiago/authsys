@@ -83,7 +83,12 @@ export const updateRole = async (req: Request, res: Response) => {
   const allowedFields = ['name', 'permissions'];
   const errors = validateAllowedFields(Object.keys(req.body), allowedFields);
 
-  if (Object.keys(errors).length) return res.status(400).json({ errors });
+  if (Object.keys(errors).length)
+    return res.status(400).json({
+      status: 400,
+      message: 'One or more fields are not allowed.',
+      errors,
+    });
 
   try {
     const role = await Role.findByIdAndUpdate(req.params.id, req.body, {
@@ -93,7 +98,7 @@ export const updateRole = async (req: Request, res: Response) => {
 
     if (!role)
       return res.status(404).send({
-        status: 400,
+        status: 404,
         message: 'Role not found.',
         errors: { role: 'notFound' },
       });
@@ -109,7 +114,11 @@ export const deleteRole = async (req: Request, res: Response) => {
     const isRoleUsed = await User.findOne({ role: req.params.id });
 
     if (isRoleUsed)
-      return res.status(403).json({ errors: { role: 'Role is in use' } });
+      return res.status(403).json({
+        status: 403,
+        message: 'Role is in use',
+        errors: { role: 'inUse' },
+      });
 
     const role = await Role.findByIdAndUpdate(
       req.params.id,
