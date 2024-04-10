@@ -13,7 +13,11 @@ export const createPermission = async (req: Request, res: Response) => {
   const errors = validateAllowedFields(Object.keys(req.body), allowedFields);
 
   if (Object.keys(errors).length)
-    return res.status(400).json({ status: 400, errors });
+    return res.status(400).json({
+      status: 400,
+      message: 'One or more fields are not allowed.',
+      errors,
+    });
 
   try {
     const permission = new Permission(req.body);
@@ -36,9 +40,11 @@ export const listPermissions = async (req: Request, res: Response) => {
     try {
       if (filterString) filter = JSON.parse(filterString as string);
     } catch (parseError) {
-      return res
-        .status(400)
-        .send({ status: 400, errors: { filter: 'malFormatted' } });
+      return res.status(400).send({
+        status: 400,
+        message: 'Badly formatted filters',
+        errors: { filter: 'malFormatted' },
+      });
     }
 
     const allowedFields = ['name'];
@@ -60,21 +66,26 @@ export const updatePermission = async (req: Request, res: Response) => {
   const allowedFields = ['name', 'description'];
   const errors = validateAllowedFields(Object.keys(req.body), allowedFields);
 
-  if (Object.keys(errors).length) return res.status(400).json({ errors });
+  if (Object.keys(errors).length)
+    return res.status(400).json({
+      status: 400,
+      message: 'One or more fields are not allowed.',
+      errors,
+    });
 
   try {
     const permission = await Permission.findByIdAndUpdate(
       req.params.id,
       req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
+      { new: true, runValidators: true }
     );
+
     if (!permission)
-      return res
-        .status(404)
-        .send({ status: 400, errors: { user: 'notFound' } });
+      return res.status(404).send({
+        status: 400,
+        message: 'Permission not found.',
+        errors: { permission: 'notFound' },
+      });
 
     res.status(200).send(formatPermissionResponse(permission));
   } catch (error) {
@@ -87,23 +98,24 @@ export const deletePermission = async (req: Request, res: Response) => {
     const isPermissionUsed = await Role.findOne({ permissions: req.params.id });
 
     if (isPermissionUsed)
-      return res
-        .status(403)
-        .json({ errors: { permission: 'Permission is in use' } });
+      return res.status(403).json({
+        status: 403,
+        message: 'Permission is in use',
+        errors: { permission: 'inUse' },
+      });
 
     const permission = await Permission.findByIdAndUpdate(
       req.params.id,
-      {
-        deleted: true,
-        deletedAt: new Date(),
-      },
+      { deleted: true, deletedAt: new Date() },
       { new: true }
     );
 
     if (!permission)
-      return res
-        .status(404)
-        .send({ status: 400, errors: { user: 'notFound' } });
+      return res.status(404).send({
+        status: 400,
+        message: 'Permission not found.',
+        errors: { permission: 'notFound' },
+      });
 
     res.status(200).send(formatPermissionResponse(permission));
   } catch (error) {
@@ -117,9 +129,11 @@ export const restorePermission = async (req: Request, res: Response) => {
     const permission = await Permission.restore({ _id: permissionId });
 
     if (!permission)
-      return res
-        .status(404)
-        .send({ status: 400, errors: { user: 'notFound' } });
+      return res.status(404).send({
+        status: 400,
+        message: 'Permission not found.',
+        errors: { permission: 'notFound' },
+      });
 
     res.status(200).send(permission);
   } catch (error) {

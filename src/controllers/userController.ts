@@ -12,7 +12,11 @@ export const createUser = async (req: Request, res: Response) => {
   const errors = validateAllowedFields(Object.keys(req.body), allowedFields);
 
   if (Object.keys(errors).length)
-    return res.status(400).json({ status: 400, errors });
+    return res.status(400).json({
+      status: 400,
+      message: 'One or more fields are not allowed.',
+      errors,
+    });
 
   try {
     const user = new User(req.body);
@@ -35,9 +39,11 @@ export const listUsers = async (req: Request, res: Response) => {
     try {
       if (filterString) filter = JSON.parse(filterString as string);
     } catch (parseError) {
-      return res
-        .status(400)
-        .send({ status: 400, errors: { filter: 'malFormatted' } });
+      return res.status(400).send({
+        status: 400,
+        message: 'Badly formatted filters',
+        errors: { filter: 'malFormatted' },
+      });
     }
 
     const allowedFields = ['username', 'email'];
@@ -70,9 +76,11 @@ export const updateUser = async (req: Request, res: Response) => {
       runValidators: true,
     });
     if (!user)
-      return res
-        .status(404)
-        .send({ status: 400, errors: { user: 'notFound' } });
+      return res.status(404).send({
+        status: 400,
+        message: 'User not found.',
+        errors: { user: 'notFound' },
+      });
 
     res.status(200).send(formatUserResponse(user));
   } catch (error) {
@@ -84,17 +92,16 @@ export const deleteUser = async (req: Request, res: Response) => {
   try {
     const user = await User.findByIdAndUpdate(
       req.params.id,
-      {
-        deleted: true,
-        deletedAt: new Date(),
-      },
+      { deleted: true, deletedAt: new Date() },
       { new: true }
     );
 
     if (!user)
-      return res
-        .status(404)
-        .send({ status: 400, errors: { user: 'notFound' } });
+      return res.status(404).send({
+        status: 400,
+        message: 'User not found.',
+        errors: { user: 'notFound' },
+      });
 
     res.status(200).send(formatUserResponse(user));
   } catch (error) {
@@ -108,9 +115,11 @@ export const restoreUser = async (req: Request, res: Response) => {
     const user = await User.restore({ _id: userId });
 
     if (!user)
-      return res
-        .status(404)
-        .send({ status: 400, errors: { user: 'notFound' } });
+      return res.status(404).send({
+        status: 400,
+        message: 'User not found.',
+        errors: { user: 'notFound' },
+      });
 
     res.status(200).send(user);
   } catch (error) {

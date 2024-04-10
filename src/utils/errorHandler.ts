@@ -24,20 +24,20 @@ export const handleError = (error: any, res: Response): void => {
     const errors = handleValidationError(error);
     res.status(400).json({
       status: 400,
-      title: 'One or more validation errors occurred',
+      message: 'One or more validation errors occurred.',
       errors,
     });
   } else if (error.code === 11000) {
     const field = handleDuplicateKeyError(error, res);
     res.status(400).json({
       status: 400,
-      title: `The provided value for the ${field} field is already in use. Please choose a different value`,
+      message: `The provided value for the ${field} field is already in use. Please choose a different value.`,
       errors: { [field]: 'duplicated' },
     });
   } else {
     res.status(500).send({
       status: 500,
-      title: 'Internal Server Error. Please try again later.',
+      message: 'Internal Server Error. Please try again later.',
       errors: { server: 'internalServerError' },
     });
   }
