@@ -1,11 +1,16 @@
+import mongoose from 'mongoose';
 import { Request, Response } from 'express';
 
 import { handleError } from '../utils/errorHandler';
 import { validateAllowedFields } from '../utils/validateFields';
 
 import User from '../models/User';
+import UserAuditLog from '../models/UserAuditLog';
 
 import formatUserResponse from '../helpers/userResponseHelper';
+
+import { UserService } from '../use_cases/users/UserService';
+import { AuditLogService } from '../use_cases/audit/users/AuditLogService';
 
 export const createUser = async (req: Request, res: Response) => {
   const allowedFields = ['username', 'email', 'password'];
@@ -19,8 +24,17 @@ export const createUser = async (req: Request, res: Response) => {
     });
 
   try {
-    const user = new User(req.body);
-    await user.save();
+    const userService = new UserService();
+    const auditLogService = new AuditLogService();
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    const user = await userService.createUser(req.body, session);
+    await auditLogService.createUserLog(user, session);
+
+    await session.commitTransaction();
+    session.endSession();
 
     res.status(201).send(formatUserResponse(user));
   } catch (error) {
@@ -68,19 +82,40 @@ export const updateUser = async (req: Request, res: Response) => {
   const allowedFields = ['username'];
   const errors = validateAllowedFields(Object.keys(req.body), allowedFields);
 
-  if (Object.keys(errors).length) return res.status(400).json({ errors });
+  if (Object.keys(errors).length)
+    return res.status(400).json({
+      status: 400,
+      message: 'One or more fields are not allowed.',
+      errors,
+    });
 
   try {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     const user = await User.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
+      session,
     });
     if (!user)
       return res.status(404).send({
-        status: 400,
+        status: 404,
         message: 'User not found.',
         errors: { user: 'notFound' },
       });
+
+    const logEntry = new UserAuditLog({
+      userId: user._id,
+      action: 'UPDATE',
+      changes: { newUser: user.toObject() },
+      changedBy: res.locals.userId,
+      changedAt: new Date(),
+    });
+    await logEntry.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
 
     res.status(200).send(formatUserResponse(user));
   } catch (error) {
@@ -98,7 +133,7 @@ export const deleteUser = async (req: Request, res: Response) => {
 
     if (!user)
       return res.status(404).send({
-        status: 400,
+        status: 404,
         message: 'User not found.',
         errors: { user: 'notFound' },
       });
@@ -116,7 +151,7 @@ export const restoreUser = async (req: Request, res: Response) => {
 
     if (!user)
       return res.status(404).send({
-        status: 400,
+        status: 404,
         message: 'User not found.',
         errors: { user: 'notFound' },
       });

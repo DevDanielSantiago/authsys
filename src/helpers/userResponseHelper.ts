@@ -1,17 +1,6 @@
-import { Document, Types } from 'mongoose';
-import { IUser } from '../models/User';
+import { UserResponseDto } from '../use_cases/dtos/users/CreateUserDto';
 
-type ResponseData =
-  | (Document<unknown, {}, IUser> &
-      IUser & {
-        _id: Types.ObjectId;
-      })
-  | (Document<unknown, {}, IUser> &
-      IUser & {
-        _id: Types.ObjectId;
-      })[];
-
-const formatUserResponse = (data: ResponseData) => {
+const formatUserResponse = (data: UserResponseDto | UserResponseDto[]) => {
   if (Array.isArray(data)) {
     return data.map(item => ({
       _id: item._id,

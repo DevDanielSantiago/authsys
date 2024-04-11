@@ -49,6 +49,7 @@ export const roleMiddleware = (permissionRequired: string) => {
           errors: { roles: 'forbidden' },
         });
 
+      res.locals['userId'] = decoded.userId;
       next();
     } catch (error) {
       return res.status(401).json({
