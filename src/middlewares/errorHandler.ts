@@ -1,6 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 
-const errorHandler = (err: any, _: Request, res: Response) => {
+const errorHandler = (
+  err: any,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   if (err instanceof SyntaxError && 'body' in err) {
     return res.status(400).send({
       status: 400,

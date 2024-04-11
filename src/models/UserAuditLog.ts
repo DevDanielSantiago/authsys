@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-interface IUserAuditLog extends Document {
+export interface IUserAuditLog extends Document {
   userId: string;
   action: string;
   changes: any;
